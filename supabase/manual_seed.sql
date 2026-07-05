@@ -1,17 +1,30 @@
--- Demo seed data for UI testing and local development
+-- Manual demo seed for Supabase SQL editor
+-- Use this if you do not have the DB password for CLI-based seeding.
+-- Run this file inside the Supabase dashboard SQL editor.
 
--- Keep product seed idempotent by barcode so the seed can be re-run safely.
+DELETE FROM public.product_batches
+WHERE product_id IN (
+  SELECT id FROM public.products
+  WHERE barcode IN (
+    '6221234567011','6221234567012','6221234567013','6221234567014','6221234567015',
+    '6221234567016','6221234567017','6221234567018','6221234567019','6221234567020',
+    '6221234567021','6221234567022','6221234567023','6221234567024','6221234567025'
+  )
+);
+
+DELETE FROM public.prescriptions
+WHERE doctor_name IN ('Dr. Hany Khalil', 'Dr. Rania Adel', 'Dr. Tarek Sami');
 
 DELETE FROM public.suppliers
 WHERE name IN ('Al Noor Medical Supply', 'Green Line Pharma', 'Delta Care Distribution');
+
+DELETE FROM public.customers
+WHERE name IN ('Ahmed Ali', 'Mona Hassan', 'Omar Youssef', 'Sara Mahmoud', 'Khaled Nabil');
 
 INSERT INTO public.suppliers (name, phone, email, address, balance, rating, notes) VALUES
   ('Al Noor Medical Supply', '+201000000001', 'orders@alnoor.example', 'Cairo, Egypt', 12450, 5, 'Fast moving OTC and chronic meds'),
   ('Green Line Pharma', '+201000000002', 'sales@greenline.example', 'Giza, Egypt', 8200, 4, 'Monthly replenishment partner'),
   ('Delta Care Distribution', '+201000000003', 'hello@deltacare.example', 'Alexandria, Egypt', 5600, 4, 'Specialty and antibiotics');
-
-DELETE FROM public.customers
-WHERE name IN ('Ahmed Ali', 'Mona Hassan', 'Omar Youssef', 'Sara Mahmoud', 'Khaled Nabil');
 
 INSERT INTO public.customers (name, phone, email, balance, points, notes) VALUES
   ('Ahmed Ali', '+201010100001', 'ahmed.ali@example.com', 0, 120, 'Chronic diabetes patient'),
@@ -20,7 +33,6 @@ INSERT INTO public.customers (name, phone, email, balance, points, notes) VALUES
   ('Sara Mahmoud', '+201010100004', 'sara.mahmoud@example.com', 0, 35, 'Family account'),
   ('Khaled Nabil', '+201010100005', 'khaled.nabil@example.com', 12, 18, 'Occasional OTC buyer');
 
--- Re-run safe for products: update matching barcodes if they already exist.
 INSERT INTO public.products (name, name_en, barcode, category, price, cost, quantity, min_stock, notes)
 VALUES
   ('بانادول أدفانس', 'Panadol Advance', '6221234567011', 'Analgesic', 35, 22, 120, 20, 'Fever and pain relief'),
@@ -47,16 +59,6 @@ ON CONFLICT (barcode) DO UPDATE SET
   quantity = EXCLUDED.quantity,
   min_stock = EXCLUDED.min_stock,
   notes = EXCLUDED.notes;
-
-DELETE FROM public.product_batches
-WHERE product_id IN (
-  SELECT id FROM public.products
-  WHERE barcode IN (
-    '6221234567011','6221234567012','6221234567013','6221234567014','6221234567015',
-    '6221234567016','6221234567017','6221234567018','6221234567019','6221234567020',
-    '6221234567021','6221234567022','6221234567023','6221234567024','6221234567025'
-  )
-);
 
 INSERT INTO public.product_batches (product_id, batch_number, manufacture_date, expiry_date, quantity, cost, notes)
 SELECT id, 'BN-PAN-2401', '2025-01-10', '2027-01-10', 60, 22, 'Main warehouse' FROM public.products WHERE barcode = '6221234567011';
@@ -90,9 +92,6 @@ INSERT INTO public.product_batches (product_id, batch_number, manufacture_date, 
 SELECT id, 'BN-SIM-2401', '2025-04-03', '2027-04-03', 65, 17, 'Shelf B' FROM public.products WHERE barcode = '6221234567024';
 INSERT INTO public.product_batches (product_id, batch_number, manufacture_date, expiry_date, quantity, cost, notes)
 SELECT id, 'BN-MET-2401', '2025-03-19', '2027-03-19', 88, 33, 'Chronic meds' FROM public.products WHERE barcode = '6221234567025';
-
-DELETE FROM public.prescriptions
-WHERE doctor_name IN ('Dr. Hany Khalil', 'Dr. Rania Adel', 'Dr. Tarek Sami');
 
 INSERT INTO public.prescriptions (doctor_name, diagnosis, patient_age, patient_weight, status, notes)
 VALUES

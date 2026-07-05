@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Undo2, Search, RotateCcw, PackageSearch, ScanLine, ChevronDown, ChevronUp } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -28,6 +28,7 @@ function Returns() {
   const [quickProductId, setQuickProductId] = useState<string | null>(null);
   const [quickReason, setQuickReason] = useState("");
   const [mode, setMode] = useState<"invoice" | "quick">("invoice");
+  const [expandedReturnId, setExpandedReturnId] = useState<string | null>(null);
 
   const fmt = (n: number) =>
     `${Number(n).toLocaleString(lang === "ar" ? "ar-EG" : "en-US")} ${t("currency")}`;
@@ -63,7 +64,7 @@ function Returns() {
     queryFn: async () => {
       const { data } = await supabase
         .from("sale_returns")
-        .select("id, sale_id, total_amount, reason, created_at")
+        .select("id, sale_id, total_amount, reason, created_at, sale_return_items(quantity, unit_price, subtotal, products(name))")
         .order("created_at", { ascending: false })
         .limit(20);
       return data ?? [];
@@ -148,6 +149,7 @@ function Returns() {
       setSelectedSaleId(null);
       setQtys({});
       setReason("");
+      setExpandedReturnId(null);
       qc.invalidateQueries({ queryKey: ["recent-returns"] });
       qc.invalidateQueries({ queryKey: ["products"] });
     },
@@ -188,6 +190,7 @@ function Returns() {
       setQuickQty(1);
       setQuickProductId(null);
       setQuickReason("");
+      setExpandedReturnId(null);
       qc.invalidateQueries({ queryKey: ["recent-returns"] });
       qc.invalidateQueries({ queryKey: ["products"] });
     },
@@ -377,14 +380,54 @@ function Returns() {
             </thead>
             <tbody>
               {recentReturns.map((r: any) => (
-                <tr key={r.id} className="border-b border-border/50">
-                  <td className="px-3 py-2.5">{new Date(r.created_at).toLocaleString()}</td>
-                  <td className="px-3 py-2.5">#{r.sale_id?.slice(0, 8) ?? "—"}</td>
-                  <td className="px-3 py-2.5 font-semibold text-destructive">
-                    {fmt(Number(r.total_amount))}
-                  </td>
-                  <td className="px-3 py-2.5 text-muted-foreground">{r.reason ?? "—"}</td>
-                </tr>
+                <Fragment key={r.id}>
+                  <tr key={r.id} className="border-b border-border/50 hover:bg-muted/20">
+                    <td className="px-3 py-2.5">{new Date(r.created_at).toLocaleString()}</td>
+                    <td className="px-3 py-2.5">#{r.sale_id?.slice(0, 8) ?? "—"}</td>
+                    <td className="px-3 py-2.5 font-semibold text-destructive">
+                      {fmt(Number(r.total_amount))}
+                    </td>
+                    <td className="px-3 py-2.5 text-muted-foreground">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="truncate">{r.reason ?? "—"}</span>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7 shrink-0"
+                          onClick={() => setExpandedReturnId((curr) => (curr === r.id ? null : r.id))}
+                        >
+                          {expandedReturnId === r.id ? (
+                            <ChevronUp className="h-4 w-4" />
+                          ) : (
+                            <ChevronDown className="h-4 w-4" />
+                          )}
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                  {expandedReturnId === r.id && (
+                    <tr className="bg-muted/20">
+                      <td colSpan={4} className="px-3 py-3">
+                        <div className="rounded-xl border border-border/60 bg-card p-3 space-y-2">
+                          <div className="text-xs font-semibold text-muted-foreground">تفاصيل المرتجع</div>
+                          <div className="space-y-2">
+                            {(r.sale_return_items ?? []).map((item: any, idx: number) => (
+                              <div key={`${r.id}-${idx}`} className="flex items-center justify-between gap-2 text-sm">
+                                <div className="min-w-0">
+                                  <div className="font-medium truncate">{item.products?.name ?? "—"}</div>
+                                  <div className="text-xs text-muted-foreground">
+                                    {Number(item.quantity)} × {fmt(Number(item.unit_price))}
+                                  </div>
+                                </div>
+                                <div className="font-semibold">{fmt(Number(item.subtotal))}</div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </Fragment>
               ))}
               {!recentReturns.length && (
                 <tr>

@@ -2,13 +2,14 @@ import { createFileRoute, useRouterState } from "@tanstack/react-router";
 import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
-  Truck, Plus, Check, X, Send, Search, PackageCheck,
+  Truck, Plus, Check, X, Send, PackageCheck,
   ChevronDown, ChevronUp, AlertCircle, Building2,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useI18n } from "@/i18n";
 import { useAuth } from "@/hooks/use-auth";
 import { PageHeader } from "@/components/page-header";
+import { SearchAddBar } from "@/components/search-add-bar";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -109,11 +110,6 @@ function Purchases() {
       <PageHeader
         title={t("purchases")}
         icon={<Truck className="h-5 w-5" />}
-        actions={
-          <Button onClick={() => setNewOpen(true)} className="gap-2 gradient-primary">
-            <Plus className="h-4 w-4" /> {t("newPurchaseOrder")}
-          </Button>
-        }
       />
 
       <Tabs value={tab} className="space-y-4">
@@ -131,15 +127,14 @@ function Purchases() {
 
         {/* Purchase Orders Tab */}
         <TabsContent value="orders">
-          <div className="relative mb-3">
-            <Search className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder={t("search")}
-              className="ps-10"
-            />
-          </div>
+          <SearchAddBar
+            search={search}
+            onSearchChange={setSearch}
+            onAdd={() => setNewOpen(true)}
+            addLabel={t("newPurchaseOrder")}
+            placeholder={t("search")}
+            className="mb-3"
+          />
           <Card className="overflow-hidden">
             <div className="divide-y divide-border/60">
               {isLoading && <div className="p-6 text-center text-muted-foreground">{t("loading")}</div>}

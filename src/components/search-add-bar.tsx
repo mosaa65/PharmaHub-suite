@@ -21,7 +21,7 @@ export function SearchAddBar({
   addDisabled?: boolean;
 }) {
   return (
-    <div className={cn("flex flex-col gap-2 sm:flex-row", className)}>
+    <div className={cn("flex flex-row items-center gap-2", className)}>
       <div className="relative flex-1">
         <Search className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
@@ -33,11 +33,12 @@ export function SearchAddBar({
       </div>
       <Button
         onClick={onAdd}
-        className="h-10 w-10 rounded-full p-0 shrink-0 gradient-primary"
+        className="h-10 shrink-0 rounded-full px-3 sm:px-4 gap-2 gradient-primary"
         disabled={addDisabled}
         aria-label={addLabel}
       >
         <Plus className="h-4 w-4" />
+        <span className="hidden sm:inline">{addLabel}</span>
       </Button>
     </div>
   );

@@ -213,7 +213,7 @@ function BarcodePage() {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder={t("search")}
-                className="ps-10"
+                className="h-10 rounded-full ps-10"
               />
             </div>
             <div className="max-h-64 overflow-y-auto space-y-1">
@@ -265,7 +265,7 @@ function BarcodePage() {
           <Card className="p-4">
             <Label className="mb-2 block">{t("labelSize")}</Label>
             <Select value={size} onValueChange={(v) => setSize(v as LabelSize)}>
-              <SelectTrigger>
+              <SelectTrigger className="h-10 rounded-full">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>

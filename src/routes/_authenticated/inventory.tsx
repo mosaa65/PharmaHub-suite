@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
-  Package, Plus, Pencil, Trash2, Layers, Search,
+  Package, Plus, Pencil, Trash2, Layers,
   AlertTriangle, CalendarX2, ChevronDown, ChevronUp
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -109,11 +109,6 @@ function Inventory() {
       <PageHeader
         title={t("inventory")}
         icon={<Package className="h-5 w-5" />}
-        actions={
-          <Button onClick={() => setEditProduct(EMPTY_PRODUCT)} className="gap-2 gradient-primary">
-            <Plus className="h-4 w-4" /> {t("addProduct")}
-          </Button>
-        }
       />
 
       <SearchAddBar
@@ -406,6 +401,22 @@ function BatchesDialog({ product, onClose }: { product: Product; onClose: () => 
     });
   }, [batches, batchFilter, batchSearch]);
 
+  const batchStats = useMemo(() => {
+    return batches.reduce(
+      (acc, batch) => {
+        const days = daysUntil(batch.expiry_date);
+        acc.total += 1;
+        acc.quantity += batch.quantity;
+        if (days === null) acc.active += 1;
+        else if (days < 0) acc.expired += 1;
+        else if (days <= 30) acc.near += 1;
+        else acc.active += 1;
+        return acc;
+      },
+      { total: 0, quantity: 0, expired: 0, near: 0, active: 0 },
+    );
+  }, [batches]);
+
   return (
     <Dialog open onOpenChange={onClose}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -421,11 +432,30 @@ function BatchesDialog({ product, onClose }: { product: Product; onClose: () => 
           {t("fefoNote")}
         </div>
 
-        <div className="grid gap-2 sm:grid-cols-[1fr_180px] mb-4">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3">
+          <div className="rounded-xl border border-border/60 bg-muted/30 p-3">
+            <p className="text-[11px] text-muted-foreground">{t("batches")}</p>
+            <p className="text-lg font-semibold">{batchStats.total}</p>
+          </div>
+          <div className="rounded-xl border border-border/60 bg-muted/30 p-3">
+            <p className="text-[11px] text-muted-foreground">{t("quantity")}</p>
+            <p className="text-lg font-semibold">{batchStats.quantity.toLocaleString(loc)}</p>
+          </div>
+          <div className="rounded-xl border border-border/60 bg-muted/30 p-3">
+            <p className="text-[11px] text-muted-foreground">{t("expired")}</p>
+            <p className="text-lg font-semibold text-rose-600">{batchStats.expired}</p>
+          </div>
+          <div className="rounded-xl border border-border/60 bg-muted/30 p-3">
+            <p className="text-[11px] text-muted-foreground">{t("expiresIn")} 30</p>
+            <p className="text-lg font-semibold text-amber-600">{batchStats.near}</p>
+          </div>
+        </div>
+
+        <div className="grid gap-2 sm:grid-cols-[1fr_180px] mb-3">
           <Input
             value={batchSearch}
             onChange={(e) => setBatchSearch(e.target.value)}
-            placeholder={`${t("search")} / رقم التشغيلة`}
+            placeholder={`${t("search")} / رقم التشغيلة / ملاحظات`}
             className="h-9 rounded-full"
           />
           <Select value={batchFilter} onValueChange={(v) => setBatchFilter(v as any)}>
@@ -439,6 +469,26 @@ function BatchesDialog({ product, onClose }: { product: Product; onClose: () => 
               <SelectItem value="active">{t("inStock")}</SelectItem>
             </SelectContent>
           </Select>
+        </div>
+
+        <div className="flex flex-wrap gap-2 mb-4">
+          {[
+            { key: "all", label: t("all") },
+            { key: "active", label: t("inStock") },
+            { key: "near", label: `${t("expiresIn")} 30` },
+            { key: "expired", label: t("expired") },
+          ].map((item) => (
+            <Button
+              key={item.key}
+              type="button"
+              variant={batchFilter === item.key ? "default" : "outline"}
+              size="sm"
+              className={`h-8 rounded-full px-3 ${batchFilter === item.key ? "gradient-primary" : ""}`}
+              onClick={() => setBatchFilter(item.key as any)}
+            >
+              {item.label}
+            </Button>
+          ))}
         </div>
 
         {/* Batches List */}
