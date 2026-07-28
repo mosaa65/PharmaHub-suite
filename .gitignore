@@ -1,32 +1,24 @@
-# Logs
-logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
+.codebuddy
 
-node_modules
-dist
-dist-ssr
-.output
-.vinxi
-.tanstack/**
-.nitro
-*.local
+# Dependencies
+/node_modules/
 
-# Wrangler / Cloudflare
-.wrangler/
-.dev.vars
+# Build and generated output
+/.output/
+/dist/
+/coverage/
 
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
-.DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
+# Local environment and Supabase state
+.env
+.env.*
+!.env.example
+/supabase/.temp/
+
+# Local Git copies and showcase artifacts
+/.git_disabled/
+/.tmp-showcase-*/
+/showcase.html
+/test-file-script.js
+
+# Local documentation reference used while authoring README files
+/example_readme.md
