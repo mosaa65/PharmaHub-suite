@@ -585,7 +585,7 @@ Mousa Gamil Al-Awadhi
 
 Ibb, Yemen · [mousa.mc13@gmail.com](mailto:mousa.mc13@gmail.com) · [+967 772 217 218](tel:+967772217218)
 
-[Website](https://inma-soft.vercel.app) · [LinkedIn](https://www.linkedin.com/in/mousa-al-awadhi-6518633a8) · [GitHub](https://github.com/mosaa65) · [Live Project](<PROJECT_LIVE_URL>)
+[Website](https://inma-soft.vercel.app) · [LinkedIn](https://www.linkedin.com/in/mousa-al-awadhi-6518633a8) · [GitHub](https://github.com/mosaa65) · [Live Project](pharma-hub-suite.vercel.app)
 
 تم التطوير بواسطة فريق Inama Soft © 2026
 
